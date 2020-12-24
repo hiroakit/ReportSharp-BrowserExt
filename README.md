@@ -22,6 +22,15 @@ Capabilities
 
 ## Build
 
+![GitHub](./doc/summary/RreportSharp_GitHub_Ext.gif)
+
+Capabilities
+
+- Copy issue title with url as the Markdown format.
+- Copy pr title with url as the Markdown format.
+
+## Build
+
 ```sh
 # debug build
 npm run build
