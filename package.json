@@ -1,0 +1,17 @@
+{
+  "name": "report-sharp",
+  "version": "0.0.1",
+  "description": "Report Assistant",
+  "main": "./src/content.js",
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^5.11.0",
+    "webpack-cli": "^4.2.0"
+  },
+  "scripts": {
+    "build": "webpack --mode development",
+    "publish": "webpack --mode production"	
+  },
+  "author": "Hiroaki ENDOH",
+  "license": "MIT"
+}
