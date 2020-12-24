@@ -100,6 +100,7 @@ function addExportButton(){
 
 import { AzureDevOps } from './modules/azuredevops.js'
 import { Backlog } from './modules/backlog.js'
+import { GitHub } from './modules/github.js'
 
 window.addEventListener('load', function(){
   addExportButton()
@@ -108,8 +109,15 @@ window.addEventListener('load', function(){
   const azuredevops = new AzureDevOps()
   azuredevops.addButton()
 
-  const backlog = new Backlog()
-  backlog.addCopyTitleButtonForTicket()
-  backlog.addCopyTitleButtonForWiki()  
+  if (Backlog.validDomain(document.URL)) {
+	const backlog = new Backlog()
+	backlog.addCopyTitleButtonForTicket()
+	backlog.addCopyTitleButtonForWiki()	
+  }
+
+  if (GitHub.validDomain(document.URL)) {
+	const github = new GitHub()
+	github.addCopyTitleButtonForIssue()
+  }
 })
 

@@ -8,7 +8,18 @@ export class Backlog {
   constructor() {
 
   }
-  
+
+  static validDomain(url) {
+	if (url == null) {
+	  return false
+	}
+
+	const pattern = "http(s)?://([\\\w-]+\\\.)(backlog.)(com|jp)"
+	var regexp = new RegExp(pattern);
+	
+	return regexp.test(url);
+  }
+    
   addCopyTitleButtonForTicket() {
 	var ticketHeaderElement = document.querySelector("div.ticket__header > div.ticket__key.-has-button")
 	if(ticketHeaderElement == null){
