@@ -1,6 +1,7 @@
 # ReportSharp-BrowserExt
 
-ReportSharp-BrowserExt provide a reporting process that is simple and clean from your web browser.
+ReportSharp-BrowserExt provide a reporting process that is simple and clean from your web browser.  
+Supporting Google Chrome, Microsoft Edge.
 
 ## Azure DevOps
 
