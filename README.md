@@ -4,15 +4,20 @@ ReportSharp-BrowserExt provide a reporting process that is simple and clean from
 
 ## Azure DevOps
 
-<video width="320" height="240" controls>
-  <source src="./doc/videos/RreportSharp_AzureDevOps_Ext.mp4" type="video/mp4">
-</video>
-
 ![Azure DevOps](./doc/summary/RreportSharp_AzureDevOps_Ext.gif)
+
+Capabilities
+
+- Copy item title with url as the Markdown format.
 
 ## Backlog
 
 ![Backlog](./doc/summary/RreportSharp_Backlog_Ext.gif)
+
+Capabilities
+
+- Copy ticket title with url as the Markdown format.
+- Copy wiki page title with url as the Markdown format.
 
 ## Build
 
@@ -23,6 +28,17 @@ npm run build
 # release build
 npm run publish 
 ```
+
+## Installation
+
+**Via store**
+
+- TBD
+
+**Via local**
+
+![Develop Release](./doc/summary/RreportSharp_Develop_Installation.gif)
+
 
 ## LICENSE
 
