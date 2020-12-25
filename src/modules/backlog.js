@@ -1,3 +1,6 @@
+import { Markdown } from './markdown.js'
+import { OrgMode } from './orgmode.js'
+
 /**
  * Backlog
  */
@@ -35,10 +38,18 @@ export class Backlog {
 	  let linkElement = document.querySelector("#editIssueButton")
 
 	  let number = numberElement.textContent
-	  let title = titleElement.textContent
+	  let title = titleElement.textContent.trim()
 	  let url = linkElement.href
 
-	  var text = ("[" + number + " " + title + "]" + "(" + url + ")")	  
+	  var text = ""	  
+	  if (ReportSharp.config.format == "orgmode"){
+		var writer = new OrgMode()
+		text = writer.makeTitle(number + " " + title, url)
+	  } else {
+		var writer = new Markdown()
+		text = writer.makeTitle(number + " " + title, url)		
+	  }
+	  
 	  navigator.clipboard.writeText(text)
 	})
   }
@@ -53,7 +64,7 @@ export class Backlog {
 	element.insertAdjacentHTML("beforeend", html)
 	element.lastChild.addEventListener("mouseup", (event) => {
 	  let breadcrumbs = [...document.querySelector("#mainTitle").getElementsByClassName("breadcrumbs__item")]
-	  let title = breadcrumbs[breadcrumbs.length - 1].textContent
+	  let title = breadcrumbs[breadcrumbs.length - 1].textContent.trim()
 	  let url = document.URL
 	  
 	  var text = ("[" + title + "]" + "(" + url + ")")	  
