@@ -42,7 +42,7 @@ export class Backlog {
 	  let url = linkElement.href
 
 	  var text = ""	  
-	  if (ReportSharp.config.format == "orgmode"){
+	  if (ReportSharp.config.format == "orgmode") {
 		var writer = new OrgMode()
 		text = writer.makeTitle(number + " " + title, url)
 	  } else {
