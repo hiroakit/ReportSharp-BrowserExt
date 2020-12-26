@@ -216,13 +216,10 @@ export class AzureDevOps {
 	}
 	bar = bar[0]
 	
-	var html = '<div class="ms-CommandBarItem"><div><button type="button" class="ms-CommandBarItem-link" role="menuitem" aria-expanded="false" aria-label="Copy All PBI title" aria-haspopup="true" aria-setsize="7" aria-posinset="1" data-automation-id="commandBarOverflow">Copy All PBI</button></div></div>'
-	bar.insertAdjacentHTML('beforeend', html);
-
-	
+	var html1 = '<div class="ms-CommandBarItem"><div><button type="button" class="ms-CommandBarItem-link" role="menuitem" aria-expanded="false" aria-label="Copy All PBI title" aria-haspopup="true" aria-setsize="7" aria-posinset="1" data-automation-id="commandBarOverflow">Copy All PBI</button></div></div>'
+	bar.insertAdjacentHTML('beforeend', html1);
 	bar.lastChild.addEventListener("mouseup", (event) => {
-	  var text = ""
-	  
+	  var text = ""	  
 	  var rows = [...document.getElementsByClassName("taskboard-content-row")]
 	  rows.forEach(function(row) {
 		var element = row.children[1]
@@ -250,11 +247,64 @@ export class AzureDevOps {
 		  result = writer.makeTitle(type + " " + number + " " + title, url)
 		} else {
 		  var writer = new Markdown()
-		  result = writer.makeTitle(type + " " + number + " " + title, url)		
+		  result = writer.makeTitle(type + " " + number + " " + title, url)
+		}		
+		text += result + "\n"		
+	  })
+
+	  navigator.clipboard.writeText(text)
+	})
+
+	// Export PBI as Markdown Table
+	var html2 = '<div class="ms-CommandBarItem"><div><button type="button" class="ms-CommandBarItem-link" role="menuitem" aria-expanded="false" aria-label="Copy All PBI title" aria-haspopup="true" aria-setsize="7" aria-posinset="1" data-automation-id="commandBarOverflow">Export PBI as Markdown Table</button></div></div>'
+	bar.insertAdjacentHTML('beforeend', html2);
+	bar.lastChild.addEventListener("mouseup", (event) => {
+	  var rows = [...document.getElementsByClassName("taskboard-content-row")]
+	  var data = []
+	  rows.forEach(function(row) {
+		var element = row.children[1]
+
+		var titleContainer = element.firstElementChild.firstElementChild
+		var html_event = new Event( "mouseover", {"bubbles":true, "cancelable":true})
+		titleContainer.querySelector("span.clickable-title").dispatchEvent(html_event)
+		
+		var type = titleContainer.querySelector("span > div > i").getAttribute("aria-label")
+		if(type == "Product Backlog Item"){
+		  type = "PBI"
 		}
 		
-		text += result + "\n"
+		var number = titleContainer.querySelector("div.id").textContent
+		var title = titleContainer.querySelector("span.clickable-title").textContent
+		var encoder = new TextEncoder("utf-8")
+		var utf8Array = encoder.encode(title)
+		var decoder = new TextDecoder("utf-8")
+		var decodedText = decoder.decode(utf8Array)
+
+		var url = titleContainer.querySelector("div.title.ellipsis > a").href
+
+		var issue = {
+		  type : "Product Backlog Item",
+		  number : number,
+		  title : title,
+		  url : url,
+		  platform : "Azure DevOps",
+		  description : ""
+		}
+		data.push(issue)	
 	  })
+	  
+	  if (data == null || data.length < 1) {
+		return
+	  }
+
+	  var text = ""			  
+	  if (ReportSharp.config.format == "orgmode") {
+		// Do nothing...
+	  } else {
+		var writer = new Markdown()
+		text = writer.makeTable(data)
+		console.log(text)
+	  }	  
 	  navigator.clipboard.writeText(text)
 	})
   }
