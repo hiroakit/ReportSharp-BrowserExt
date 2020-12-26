@@ -68,70 +68,147 @@ export class AzureDevOps {
 	if(decodedText.length > 14){
 	  title = decodedText.substr(0, 14) + '...'
 	}
-
 	var url = document.querySelector(selectorC).href
-	var result = ("[" + type + " " + number + " " + title + "]" + "(" + url + ")")
-	navigator.clipboard.writeText(result)
+
+	var text = ""	  
+	if (ReportSharp.config.format == "orgmode") {
+	  var writer = new OrgMode()
+	  text = writer.makeTitle(type + " " + number + " " + title, url)
+	} else {
+	  var writer = new Markdown()
+	  text = writer.makeTitle(type + " " + number + " " + title, url)		
+	}
+	navigator.clipboard.writeText(text)
+  }
+
+  containNode(nodes) {
+	for (var i = 0; i < nodes.length; i++) {
+	  let node = nodes[i]
+	  if (node.className == "internal-content-host sprint-view-container") {
+		return true
+	  }
+	}
+	return false	
+  }
+
+  addEventListener() {
+	let tiles = [...document.getElementsByClassName("tbTile")]
+	tiles.forEach(tile => {
+	  var menu = tile.getElementsByClassName("card-context-menu")
+	  if (menu == null || menu.length < 1) {
+		return
+	  }
+	  menu = menu[0]
+
+	  let handler = function handleEvent(event) {
+		AzureDevOps.prototype.appendCopyTitleButtonOnPopupMenu(this.tile)		        
+	  }
+	  menu.addEventListener("click", { tile : tile, handleEvent : handler})
+	})		  	
   }
   
-  addCopyMenuButton(){
-	var taskboard = document.getElementById("taskboard-table-body")
-	var tiles = [...document.getElementsByClassName("tbTile")]
-	tiles.forEach(function(tile) {
-	  const observer = new MutationObserver(records => {
-		var popup = document.getElementsByClassName("menu-popup")
-		if(popup == null){
+  addCopyMenuButton() {
+	// let taskboard = document.getElementById("taskboard-table-body")
+	// if (taskboard != null) { return }
+
+	// Listen click. Roload sprint page by web browser.
+	AzureDevOps.prototype.addEventListener()	  
+	const observer = new MutationObserver(records => {
+	  if (records.length < 1) {
+		return
+	  }
+
+	  records.forEach(record => {
+		if (record.target == null || record.target.classList == null || record.target.classList.length < 1) {
 		  return
 		}
-		if(popup.length > 0){
-		  popup = popup[0]
+		if (!record.target.classList.contains("hub-external")) {
+		  return
 		}
-	  
-		const observer2 = new MutationObserver(records2 => {
-		  let menu = document.getElementsByClassName("sub-menu")
-		  if(menu != null && menu.length > 0){
-			var html = '<li id="ext_copy-title" class="menu-item" tabindex="-1" role="menuitem" title="" aria-disabled="false" aria-posinset="2" aria-setsize="4"><span class="menu-item-icon bowtie-icon bowtie-link" aria-hidden="true"></span><span class="text" role="button">Copy title as Markdown</span><span class="html"></span></li>'
-			menu[0].insertAdjacentHTML('beforeend', html);
-			menu[0].lastChild.addEventListener("mouseup", (event) => {
-			  // div.id-title-container
-			  var titleContainer = event.currentTarget.parentElement.parentElement.parentElement.parentElement.firstElementChild.firstElementChild
+		if (record.addedNodes == null || record.addedNodes.length < 1) {
+		  return
+		}
 
-			  var html_event = new Event( "mouseover", {"bubbles":true, "cancelable":true})
-			  titleContainer.querySelector("span.clickable-title").dispatchEvent(html_event)
+		let hit = AzureDevOps.prototype.containNode(record.addedNodes)		
+		if (!hit) {
+		  return
+		}
 
-			  var type = titleContainer.querySelector("span > div > i").getAttribute("aria-label")
-			  if(type == "Product Backlog Item"){
-				type = "PBI"
-			  }
-			  
-			  var number = titleContainer.querySelector("div.id").textContent
-			  var title = titleContainer.querySelector("span.clickable-title").textContent
-			  var encoder = new TextEncoder("utf-8")
-			  var utf8Array = encoder.encode(title)
-			  var decoder = new TextDecoder("utf-8")
-			  var decodedText = decoder.decode(utf8Array)
-			  if(decodedText.length > 14){
-				title = decodedText.substr(0, 14) + '...'
-			  }		  
-			  var url = titleContainer.querySelector("div.title.ellipsis > a").href
-			  
-			  var result = ("[" + type + " " + + number + " " + title + "]" + "(" + url + ")")
-			  navigator.clipboard.writeText(result)
-			});
-		  }
-		})	
-
-		observer2.observe(popup, {
-		  childList: true
-		})	
+		// Listen click. Move sprint page from other pages.
+		AzureDevOps.prototype.addEventListener()
 	  })
-	  
-	  observer.observe(tile, {
-		childList: true
-	  })
-	})  
+	})
+
+	var body = document.querySelector("body")
+	observer.observe(body, {
+	  childList: true,
+	  subtree: true
+	})
   }
 
+  appendCopyTitleButtonOnPopupMenu(tile) {
+	var popup = document.getElementsByClassName("menu-popup")
+	if (popup == null || popup.length < 1) {
+	  return
+	}
+	popup = popup[0]
+
+	let popupObserver = new MutationObserver(records => {
+	  var menu = document.getElementsByClassName("sub-menu")
+	  if (menu == null || menu.length < 1) {
+		return
+	  }
+	  menu = menu[0]
+
+	  // Duplicate prevention.
+	  let copyTitleButton = document.getElementById("ext_copy-title")
+	  if (copyTitleButton != null) {
+		return
+	  }
+	  
+	  var html = '<li id="ext_copy-title" class="menu-item" tabindex="-1" role="menuitem" title="" aria-disabled="false" aria-posinset="2" aria-setsize="4"><span class="menu-item-icon bowtie-icon bowtie-link" aria-hidden="true"></span><span class="text" role="button">Copy title as Markdown</span><span class="html"></span></li>'
+	  menu.insertAdjacentHTML('beforeend', html);
+	  menu.lastChild.addEventListener("mouseup", (event) => {
+		// div.id-title-container
+		var titleContainer = event.currentTarget.parentElement.parentElement.parentElement.parentElement.firstElementChild.firstElementChild
+
+		var html_event = new Event( "mouseover", {"bubbles":true, "cancelable":true})
+		titleContainer.querySelector("span.clickable-title").dispatchEvent(html_event)
+
+		var type = titleContainer.querySelector("span > div > i").getAttribute("aria-label")
+		if(type == "Product Backlog Item"){
+		  type = "PBI"
+		}
+		
+		var number = titleContainer.querySelector("div.id").textContent
+		var title = titleContainer.querySelector("span.clickable-title").textContent
+		var encoder = new TextEncoder("utf-8")
+		var utf8Array = encoder.encode(title)
+		var decoder = new TextDecoder("utf-8")
+		var decodedText = decoder.decode(utf8Array)
+		if(decodedText.length > 14){
+		  title = decodedText.substr(0, 14) + '...'
+		}		  
+		var url = titleContainer.querySelector("div.title.ellipsis > a").href
+		
+		var text = ""	  
+		if (ReportSharp.config.format == "orgmode") {
+		  var writer = new OrgMode()
+		  text = writer.makeTitle(type + " " + number + " " + title, url)
+		} else {
+		  var writer = new Markdown()
+		  text = writer.makeTitle(type + " " + number + " " + title, url)		
+		}
+
+		navigator.clipboard.writeText(text)
+	  })
+	})	
+
+	popupObserver.observe(popup, {
+	  childList: true
+	})
+  }
+  
   addExportButton(){
 	var bar = document.getElementsByClassName("ms-CommandBar-primaryCommands")
 	if (bar == null || bar.length < 1){
@@ -167,7 +244,15 @@ export class AzureDevOps {
 		var decodedText = decoder.decode(utf8Array)
 
 		var url = titleContainer.querySelector("div.title.ellipsis > a").href
-		var result = ("[" + type + " " + + number + " " + title + "]" + "(" + url + ")")
+		var result = ""
+		if (ReportSharp.config.format == "orgmode") {
+		  var writer = new OrgMode()
+		  result = writer.makeTitle(type + " " + number + " " + title, url)
+		} else {
+		  var writer = new Markdown()
+		  result = writer.makeTitle(type + " " + number + " " + title, url)		
+		}
+		
 		text += result + "\n"
 	  })
 	  navigator.clipboard.writeText(text)
